@@ -1,0 +1,12 @@
+streamlit
+pandas
+nltk
+sentence_transformers
+scikit-learn
+numpy
+xlsxwriter
+chardet
+transformers
+textwrap3
+tqdm
+unicodedata2
