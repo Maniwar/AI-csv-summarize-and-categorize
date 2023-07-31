@@ -33,7 +33,7 @@ def initialize_bert_model():
     print("Initializing BERT model...")
     end_time = time.time()
     print(f"BERT model initialized. Time taken: {end_time - start_time} seconds.")
-    return SentenceTransformer('paraphrase-MiniLM-L12-v2', device="mps")
+    return SentenceTransformer('paraphrase-MiniLM-L12-v2', device="cuda")
 
 
 
@@ -105,7 +105,7 @@ def get_summarization_pipeline():
     # Capture end time
     end_time = time.time()
     print("Time taken to initialize summarization pipeline:", end_time - start_time)
-    return pipeline("summarization", model=model_name, tokenizer=tokenizer, device="mps")
+    return pipeline("summarization", model=model_name, tokenizer=tokenizer, device="cuda")
 
 # Function to compute the token count of a text
 def get_token_count(text, tokenizer):
