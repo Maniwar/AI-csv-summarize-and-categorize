@@ -22,7 +22,7 @@ import base64
 from io import BytesIO
 import streamlit as st
 import textwrap
-from categories_josh_sub.py import default_categories
+from categories_josh_sub import default_categories
 import time
 from tqdm import tqdm
 import re
