@@ -25,6 +25,9 @@ import re
 import string
 import unicodedata
 
+nltk.download('stopwords')
+nltk.download('punkt')
+nltk.download('vader_lexicon')
 
 # Initialize BERT model
 @st.cache_resource
