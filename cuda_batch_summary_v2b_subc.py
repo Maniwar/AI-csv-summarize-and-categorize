@@ -1,4 +1,3 @@
-
 import os
 
 # Set the environment variable to control tokenizers parallelism
@@ -22,7 +21,7 @@ import base64
 from io import BytesIO
 import streamlit as st
 import textwrap
-from categories_josh_sub import default_categories
+from categories_josh_sub_V6_3 import default_categories
 import time
 from tqdm import tqdm
 import re
@@ -32,11 +31,13 @@ import math
 
 from collections import defaultdict
 
+
 # Specify download directory for NLTK data
 nltk.download('stopwords', download_dir='/home/appuser/nltk_data', quiet=True)
 nltk.download('vader_lexicon', download_dir='/home/appuser/nltk_data', quiet=True)
 nltk.download('punkt', download_dir='/home/appuser/nltk_data', quiet=True)  # Add 'quiet=True' to suppress NLTK download messages
 nltk.data.path.append('/home/appuser/nltk_data')
+
 
 class SummarizationDataset(Dataset):
     def __init__(self, texts, tokenizer, max_length):
@@ -60,7 +61,7 @@ def initialize_bert_model():
     print("Initializing BERT model...")
     end_time = time.time()
     print(f"BERT model initialized. Time taken: {end_time - start_time} seconds.")
-    return SentenceTransformer('paraphrase-MiniLM-L12-v2', device="cpu")
+    return SentenceTransformer('all-mpnet-base-v2', device="cpu")
 
 # Initialize a variable to store the previous state of the categories
 previous_categories = None
@@ -84,7 +85,6 @@ def compute_keyword_embeddings(categories):
     return keyword_embeddings
 
 # Function to preprocess the text
-@st.cache_data
 def preprocess_text(text):
     #start_time = time.time()
     #print("Preprocessing text...")
@@ -94,7 +94,7 @@ def preprocess_text(text):
     #end_time = time.time()
     #print(f"Preprocessing text completed. Time taken: {end_time - start_time} seconds.")
     # Remove emojis and special characters
-    text = text.encode('ascii', 'ignore').decode('utf-8')
+    text = text.encode('ascii', 'ignore').decode(encoding)
     text = re.sub(r'[^\w\s]', '', text)
     # Remove HTML tags
     text = re.sub(r'<.*?>', '', text)
@@ -174,7 +174,7 @@ def get_summarization_model_and_tokenizer():
     model.to(device)
     return model, tokenizer, device
 
-def preprocess_comments_and_summarize(feedback_data, comment_column, batch_size=16, max_length=75, min_length=30, max_tokens=1000, very_short_limit=30):
+def preprocess_comments_and_summarize(feedback_data, comment_column, batch_size=32, max_length=75, min_length=30, max_tokens=1000, very_short_limit=30):
     print("Starting preprocessing and summarization...")
 
     # 1. Preprocess the comments
@@ -323,7 +323,7 @@ if uploaded_file is not None:
     total_rows = sum(1 for row in uploaded_file) - 1  # Subtract 1 for the header
 
     # Calculate estimated total chunks
-    chunksize = 16  # This is the chunksize you've set in your code
+    chunksize = 32  # This is the chunksize you've set in your code
     estimated_total_chunks = math.ceil(total_rows / chunksize)
 
     try:
@@ -485,9 +485,6 @@ if uploaded_file is not None:
             best_match_score = similarity_scores[index]
             summarized_text = row['summarized_comments']
 
-            # ... other code ...
-
-
             # If in emerging issue mode and the best match score is below the threshold, set category, sub-category, and keyphrase to 'No Match'
             if emerging_issue_mode and best_match_score < similarity_threshold:
                 category = 'No Match'
@@ -518,12 +515,13 @@ if uploaded_file is not None:
         return trends_data
 
     if comment_column is not None and date_column is not None and grouping_option is not None and process_button:
-        chunk_iter = pd.read_csv(BytesIO(csv_data), encoding=encoding, chunksize=16)  # Adjust chunksize as needed
+        chunk_iter = pd.read_csv(BytesIO(csv_data), encoding=encoding, chunksize=32)  # Adjust chunksize as needed
 
         # Initialize a DataFrame to store the cumulative results
         processed_chunks = []
 
         for feedback_data in chunk_iter:
+
             processed_chunk = process_feedback_data(feedback_data, comment_column, date_column, default_categories, similarity_threshold)
             processed_chunks.append(processed_chunk)
 
@@ -808,6 +806,7 @@ if uploaded_file is not None:
                         example_comments_sheet.write_string(i, 1, str(row[comment_column]))
 
                 # Save the Excel file
+            if not excel_writer.book.fileclosed:
                 excel_writer.close()
 
             # Convert the Excel file to bytes and create a download link
