@@ -18,7 +18,7 @@ import base64
 from io import BytesIO
 import streamlit as st
 import textwrap
-from categories1 import default_categories
+from categories import default_categories
 import time
 from tqdm import tqdm
 import re
